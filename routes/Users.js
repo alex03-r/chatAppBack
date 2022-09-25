@@ -17,17 +17,17 @@ router.use(cors({
 router.use(express.json())
 
 
-router.get('/users' , async (req, res) => {
+// router.get('/users' , async (req, res) => {
 
-    let users = await userModel.find();
+//     let users = await userModel.find();
         
-    return res.json({
-        ok:true,
-        users:users
-    })
+//     return res.json({
+//         ok:true,
+//         users:users
+//     })
     
 
-})
+// })
 
 
 router.post('/login' , async (req, res) => {

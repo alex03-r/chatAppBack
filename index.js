@@ -9,7 +9,7 @@ const { Server }  = require("socket.io");
 require("dotenv").config()
 
 const MessagesModel = require("./models/message")
-
+const UsersModel = require("./models/users")
 
 const router = require("./routes/Users");
 const { json } = require("express");
@@ -41,15 +41,22 @@ io.on('connection', socket => {
     // console.log(socket.id)
 
 
-    async function getLastMessages(room){
+    // async function getLastMessages(room){
 
-        let roomMessages = await Message.aggregate([
-            {$match: {to:room}},
-            {$group: {_id: '$date' , messagesByDate: {$push: '$$ROOT'}}}
-        ])
+    //     let roomMessages = await MessagesModel.aggregate([
+    //         {$match: {to:room}},
+    //         {$group: {_id: '$date' , messagesByDate: {$push: '$$ROOT'}}}
+    //     ])
     
-        return roomMessages
-    }
+    //     return roomMessages
+    // }
+
+    socket.on('new_user' , async () => {
+
+        const members = await UsersModel.find();
+        io.emit('new_user',  members )
+
+    })
 
 
     socket.on("join_room",  async (room) => {
@@ -57,8 +64,12 @@ io.on('connection', socket => {
         socket.join(room)
 
         let messages = await MessagesModel.find();
-        
-        io.to(room).emit("mess", messages )
+
+        let filteredMessages = messages.filter( msg => msg.to == room )
+
+        // let messages  = await getLastMessages(room)
+        socket.emit("mess",  filteredMessages )
+        // io.to(room).emit("mess", messages )
        
     })
 
@@ -66,17 +77,24 @@ io.on('connection', socket => {
     socket.on("send_messages" , async (content, from , date , time , to) => {
      
         let contentMessage = {
-            content:content,
-            from:from,
-            date:date,
-            time:time,
-            to:to
+            content,
+            from,
+            date,
+            time,
+            to
         }
 
 
-        await MessagesModel(contentMessage).save()  
-        
-        
+      let newMess =   await MessagesModel(contentMessage).save()  
+
+      console.log(newMess)
+
+        let messages = await MessagesModel.find();  
+        // console.log(to)
+
+        let filteredMessages = messages.filter( msg => msg.to == to )
+
+        io.in(to).emit("mess" , filteredMessages )
  
 
     })
