@@ -16,33 +16,26 @@ router.use(cors({
 
 router.use(express.json())
 
-
-// router.get('/users' , async (req, res) => {
-
-//     let users = await userModel.find();
-        
-//     return res.json({
-//         ok:true,
-//         users:users
-//     })
-    
-
-// })
-
-
 router.post('/login' , async (req, res) => {
 
     let { email , password} = req.body;
 
     let user  =  await userModel.findOne({email })
 
-    if( user &&  user.password ==  password ){
-     
-      return res.json({
-            ok:true,
-            msg:" you are log in yes",
-            user:user
+    if(user.password !==  password) {
+        return res.json({
+            ok:false,
+            msg:"the password or the email are/is incorrect"
         })
+    }
+
+        if( user  ){
+     
+        return res.json({
+                ok:true,
+                msg:" you are log in yes",
+                user:user
+            })
 
     }
 
