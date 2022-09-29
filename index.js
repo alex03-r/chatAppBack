@@ -38,26 +38,12 @@ ConectDb()
 
 io.on('connection', socket => {
  
-    // console.log(socket.id)
-
-
-    // async function getLastMessages(room){
-
-    //     let roomMessages = await MessagesModel.aggregate([
-    //         {$match: {to:room}},
-    //         {$group: {_id: '$date' , messagesByDate: {$push: '$$ROOT'}}}
-    //     ])
-    
-    //     return roomMessages
-    // }
-
     socket.on('new_user' , async () => {
 
         const members = await UsersModel.find();
         io.emit('new_user',  members )
 
     })
-
 
     socket.on("join_room",  async (room) => {
      
@@ -67,14 +53,17 @@ io.on('connection', socket => {
 
         let filteredMessages = messages.filter( msg => msg.to == room )
 
-        // let messages  = await getLastMessages(room)
         socket.emit("mess",  filteredMessages )
+        
         // io.to(room).emit("mess", messages )
        
     })
 
 
     socket.on("send_messages" , async (content, from , date , time , to) => {
+
+        console.log(content)
+        
      
         let contentMessage = {
             content,

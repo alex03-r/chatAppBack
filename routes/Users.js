@@ -5,8 +5,9 @@ const cors = require("cors")
 const app = express();
 const userModel = require("../models/users")
  
+const bcrypt = require("bcrypt")
 
-
+const  generateToken  = require("../helper")
 
 router.use(cors({
     origin:"*",
@@ -22,28 +23,36 @@ router.post('/login' , async (req, res) => {
 
     let user  =  await userModel.findOne({email })
 
-    if(user.password !==  password) {
-        return res.json({
+    if( !user  ){
+
+            return res.status(400).json({
+                ok:false,
+                msg:"Sorry this user does not exits"
+            })     
+    }
+
+
+    const validPassword = bcrypt.compareSync(password, user.password )
+
+    if(!validPassword) {
+
+       return res.status(400).json({
             ok:false,
-            msg:"the password or the email are/is incorrect"
+            msg:"The password is incorrect"
+
         })
     }
 
-        if( user  ){
-     
-        return res.json({
-                ok:true,
-                msg:" you are log in yes",
-                user:user
-            })
 
-    }
+//    let token = await  generateToken(user._id , user.name );
 
-
-    return res.json({
-        ok:false,
-        msg:"Sorry this user does not exits"
-    })   
+      
+    return res.status(200).json({
+        ok:true,
+        msg:" you are log in yes",
+        user:user,
+        // token    
+    })
     
 
 })
@@ -52,7 +61,7 @@ router.post('/login' , async (req, res) => {
 router.post('/signup' , async (req, res) => {
 
     let body = req.body;
-    let { email } = body;
+    let { email, password } = body;
     let exitsEmail = await  userModel.findOne({ email })
 
     if(exitsEmail) {
@@ -65,10 +74,18 @@ router.post('/signup' , async (req, res) => {
     }
         
     let hasProps = Object.keys(body)
+    
+
 
     if(hasProps.length == 3){
 
-       await userModel(body).save()
+        let user = new userModel(body)
+        const salt =  bcrypt.genSaltSync(10)
+        user.password = bcrypt.hashSync(password, salt )
+
+        user.save()
+
+    //    await userModel(body).save()
 
        return res.json({
             ok:true,
@@ -77,15 +94,12 @@ router.post('/signup' , async (req, res) => {
 
     }
 
-
     return res.json({
         ok:false,
         msg:"sorry there is a missing field please check out "
     })
             
 })
-
-
 
 
 module.exports = router;
