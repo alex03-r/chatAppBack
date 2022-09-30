@@ -24,6 +24,8 @@ router.use(cors({
 
 }))
 
+app.use( express.static('public') )
+
 const server = http.createServer(app)
 //http://127.0.0.1:5173/signup
 const io = new Server(server , {
@@ -93,4 +95,4 @@ io.on('connection', socket => {
 })
 
 
-server.listen( process.env.PORT || 3000, () => console.log("it is running"))
+server.listen( process.env.PORT , () => console.log(`it is running in port ${process.env.PORT}`))
