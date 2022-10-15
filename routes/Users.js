@@ -44,14 +44,14 @@ router.post('/login' , async (req, res) => {
     }
 
 
-//    let token = await  generateToken(user._id , user.name );
+   let token = await  generateToken(user._id , user.name );
 
       
     return res.status(200).json({
         ok:true,
         msg:" you are log in yes",
         user:user,
-        // token    
+        token    
     })
     
 
